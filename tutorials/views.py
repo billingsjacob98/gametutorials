@@ -26,9 +26,13 @@ def get_game_image(game_url):
 	soup = BeautifulSoup(str(raw))
 	image = soup.find_all('img')[0]
 	src = image['src']
+	if 'CentralAutoLogin' in src:
+		# don't create image - it is a special Wikipedia image
+		return None
 	image_data = requests.get('http:' + src, stream=True)
 	binary_image_data = image_data.content
-	return binary_image_data
+	image_filename = src.split('/')[-1]
+	return image_filename, binary_image_data
 
 def get_games(request):
 	WIKIPEDIA_URL = 'http://en.wikipedia.org/wiki/List_of_Xbox_One_games'
@@ -42,17 +46,20 @@ def get_games(request):
 		t = item
 		rows = t.find_all('tr')
 		# TODO - FINISH THIS - CURRENTLY JUST GETTING ROW 3 (THIRD GAME IN THE LIST)
-		print(rows)
-		rows = rows[3]
-		print(rows)
 		for i, row in enumerate(rows):
 			if i > 0:
 				name = row.find_all('a')[0].text
 				game_url = row.find_all('a')[0]['href']
 				if game_url.startswith('/wiki'):
-					game_image = get_game_image(game_url)
-				import pdb;pdb.set_trace()
-				release_date = row.find_all('td')[7]
+					game_image_and_filename = get_game_image(game_url)
+					if game_image_and_filename:
+						image_filename, game_image = game_image_and_filename
+					else:
+						image_filename, game_image = None, None
+				try:
+					release_date = row.find_all('td')[7]
+				except IndexError:
+					import pdb;pdb.set_trace()
 				try:
 					publisher = row.find_all('td')[3].find_all('a')[0].text
 				except IndexError:
@@ -73,8 +80,12 @@ def get_games(request):
 					release_date = release_date.text
 				# Only try to create the game in the database if it has been released
 				if not unreleased:
-					image_field = ContentFile(game_image)
-					game, created = Game.objects.get_or_create(name=name, release_date=release_date, 
-						publisher=publisher, front_cover=image_field)
+					if game_image and image_filename:
+						image_field = ContentFile(game_image, image_filename)
+						game, created = Game.objects.get_or_create(name=name, release_date=release_date, 
+							publisher=publisher, front_cover=image_field)
+					else:
+						game, created = Game.objects.get_or_create(name=name, release_date=release_date,
+							publisher=publisher)
 	return HttpResponse('OK')
 

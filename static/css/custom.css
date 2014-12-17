@@ -1,0 +1,39 @@
+.container {
+	width: 1479px;
+}
+
+.jumbotron h1 {
+	color:red;
+}
+
+.navbar-inverse .navbar-brand {
+	color: red;
+	font-size: 60;
+	height:100px;
+
+}
+
+.navbar-form.navbar-right:last-child {
+	margin-right: -197px;
+	margin-top: 2%;
+}
+
+.navbar-brand {
+	font-size: 72px;
+	line-height: 56px;
+}
+
+.jumbotron .container {
+	max-width: 100%;
+	margin-top: 7%;
+}
+
+.btn-primary {
+	color: #fff;
+	background-color: #DF0101;
+	border-color: #FF0000;
+}
+
+.main-content {
+	padding: 40px 15px;
+}

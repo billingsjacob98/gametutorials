@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="container">
+
+      <div class="main-content">
+        <h1>All games</h1>
+        <ul>
+        {% for game in games %}
+        	{% url 'tutorials.views.detail' game.id as game_url %}
+            <li><a href="{{ game_url }}">{{ game }}</a></li>
+        {% endfor %}
+        </ul>
+      </div>
+
+    </div>
+{% endblock %}
